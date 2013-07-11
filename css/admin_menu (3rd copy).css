@@ -1,0 +1,461 @@
+/* The container */
+#cssmenu > ul{
+	display: block;
+	position: relative;
+	width: 150px;
+	overflow:visible;
+	display:block; 
+	float:left;    
+	position:fixed;   
+    z-index:99;
+}
+
+	/* The list elements which contain the links */
+	#cssmenu > ul li {
+		display: block;
+		position: relative;
+		margin-left:-30px;
+		float:left;
+		padding: 0;
+		background-color:#f23f37;
+		width: 120px;	
+	}
+
+		/* General link styling */
+		#cssmenu > ul li a {
+			/* Layout */
+			display: block;
+			position: relative;
+			margin: 0;
+			text-align:left;
+			float:left;
+			border-top: 1px dotted #fff;
+			border-bottom: 1px dotted #d9d9d9;
+			padding: 5px 5px;
+			width: 110px;
+
+			/* Typography */
+			font-family:  Helvetica, Arial, sans-serif;
+			color: #FFFFFF;
+			text-decoration: none;
+			text-transform: uppercase;
+			text-shadow: 0 1px 0 #fff;
+			font-size: 12px;
+			font-weight: 300;
+
+			/* Background & effects */
+			background-color: #2F8C97;
+		}
+
+		/* Rounded corners for the first link of the menu/submenus */
+		#cssmenu > ul li:first-child>a {
+			border-top-left-radius: 4px;
+			border-top-right-radius: 4px;
+			border-top: 0;
+		}
+
+		/* Rounded corners for the last link of the menu/submenus */
+		#cssmenu > ul li:last-child>a {
+			border-bottom-left-radius: 4px;
+			border-bottom-right-radius: 4px;
+			border-bottom: 0;
+		}
+
+
+		/* The hover state of the menu/submenu links */
+		#cssmenu > ul li a:hover, #cssmenu > ul li:hover>a {
+			color: #fff;
+			text-shadow: 0 1px 0 rgba(0, 0, 0, .25);
+			background: #f23f37;
+			background: -webkit-linear-gradient(bottom, #f23f37, #f45d57);
+			background: -ms-linear-gradient(bottom, #f23f37, #f45d57); 
+			background: -moz-linear-gradient(bottom, #f23f37, #f45d57);
+			background: -o-linear-gradient(bottom, #f23f37, #f45d57);
+			border-color: transparent;
+		}
+
+		/* The arrow indicating a submenu */
+		#cssmenu > ul .has-sub >a::after {
+			content: '';
+			position: absolute;
+			top: 16px;
+			right: 10px;
+			width: 0px;
+			height: 0px;
+
+			/* Creating the arrow using borders */
+			border: 4px solid transparent;
+			border-left: 4px solid #e4433c; 
+		}
+
+		/* The same arrow, but with a darker color, to create the shadow effect */
+		#cssmenu > ul .has-sub >a::before {
+			content: '';
+			position: absolute;
+			top: 17px;
+			right: 10px;
+			width: 0px;
+			height: 0px;
+
+			/* Creating the arrow using borders */
+			border: 4px solid transparent;
+			border-left: 4px solid #fff;
+		}
+
+		/* Changing the color of the arrow on hover */
+		#cssmenu > ul li>a:hover::after, #cssmenu > ul li:hover>a::after {
+			border-left: 4px solid #fff;
+		}
+
+		#cssmenu > ul li>a:hover::before, #cssmenu > ul li:hover>a::before {
+			border-left: 4px solid rgba(0, 0, 0, .25);
+		}
+
+	
+		/* THE SUBMENUS */
+		#cssmenu > ul ul {
+			position: absolute;
+			left: 150px;
+			top: -9999px;
+			padding-left: 5px;
+			opacity: 0;
+			/* The fade effect, created using an opacity transition */
+			-webkit-transition: opacity .3s ease-in;
+			-moz-transition: opacity .3s ease-in;
+			-o-transition: opacity .3s ease-in;
+			-ms-transition: opacity .3s ease-in;
+		}
+
+		/* Showing the submenu when the user is hovering the parent link */
+		#cssmenu > ul li:hover>ul {
+			top: 0px;
+			opacity: 1;
+		}		
+		
+/* menu 2 that mens sub menu start 
+		shishir Ahmad babu 
+		+8801963002351
+*/
+
+/* Some stylesheet reset */
+/* The container */
+#cssmenu2 > ul{
+	display: block;
+	position: relative;
+	width: 150px;
+	float:left;
+	overflow:visible;
+	display:block;      
+	position:fixed;   
+    z-index:99;
+}
+
+	/* The list elements which contain the links */
+	#cssmenu2 > ul li {
+		display: block;
+		float:left;
+		position: relative;
+		margin-left:-30px;
+		padding: 0;
+		background-color:#f23f37;
+		width: 120px;	
+	}
+
+		/* General link styling */
+		#cssmenu2 > ul li a {
+			display: block;
+			position: relative;
+			margin: 0;
+			float:left;
+			text-align:left;
+			border-top: 1px dotted #fff;
+			border-bottom: 1px dotted #d9d9d9;
+			padding: 5px 5px;
+			width: 125px;
+
+			/* Typography */
+			font-family:  Helvetica, Arial, sans-serif;
+			color: #FFFFFF;
+			text-decoration: none;
+			text-transform: uppercase;
+			text-shadow: 0 1px 0 #fff;
+			font-size: 12px;
+			font-weight: 300;
+
+			/* Background & effects */
+			background-color: #2F8C97;
+		}
+
+		/* Rounded corners for the first link of the menu/submenus */
+		#cssmenu2 > ul li:first-child>a {
+			border-top-left-radius: 4px;
+			border-top-right-radius: 4px;
+			border-top: 0;
+		}
+
+		/* Rounded corners for the last link of the menu/submenus */
+		#cssmenu2 > ul li:last-child>a {
+			border-bottom-left-radius: 4px;
+			border-bottom-right-radius: 4px;
+			border-bottom: 0;
+			
+		}
+
+
+		/* The hover state of the menu/submenu links */
+		#cssmenu2 > ul li a:hover, #cssmenu2 > ul li:hover>a {
+			color: #fff;
+			background: #005353;
+			border-color: transparent;
+		}
+
+		/* The arrow indicating a submenu */
+		#cssmenu2 > ul .has-sub >a::after {
+			content: '';
+			position: absolute;
+			top: 16px;
+			right: 10px;
+			width: 600px;
+			height: 0px;
+
+			/* Creating the arrow using borders */
+			border: 4px solid transparent;
+			border-left: 4px solid #e4433c; 
+		}
+
+		/* The same arrow, but with a darker color, to create the shadow effect */
+		#cssmenu2 > ul .has-sub >a::before {
+			content: '';
+			position: absolute;
+			top: 17px;
+			right: 10px;
+			width: 300px;
+			height: 0px;
+
+			/* Creating the arrow using borders */
+			border: 4px solid transparent;
+			border-left: 4px solid #fff;
+		}
+
+		/* Changing the color of the arrow on hover */
+		#cssmenu2 > ul li>a:hover::after, #cssmenu2 > ul li:hover>a::after {
+			border-left: 4px solid #fff;
+		}
+
+		#cssmenu2 > ul li>a:hover::before, #cssmenu2 > ul li:hover>a::before {
+			border-left: 4px solid rgba(0, 0, 0, .25);
+		}
+
+	
+		/* THE SUBMENUS */
+		#cssmenu2 > ul ul {
+			position: absolute;
+			left: 30px;
+			top: -9999px;
+			padding-left: 5px;
+			opacity: 0;
+			/* The fade effect, created using an opacity transition */
+			-webkit-transition: opacity .3s ease-in;
+			-moz-transition: opacity .3s ease-in;
+			-o-transition: opacity .3s ease-in;
+			-ms-transition: opacity .3s ease-in;
+		}
+
+		/* Showing the submenu when the user is hovering the parent link */
+		#cssmenu2 > ul li:hover>ul {
+			top: 0px;
+			opacity: 1;
+		}
+		
+/* menu 3 that mens sub menu start 
+		shishir Ahmad babu 
+		+8801963002351
+*/
+
+
+
+/* Some stylesheet reset */
+#cssmenu3 > ul {
+	list-style: none;
+	float:inherit;
+	height:300px;
+	margin: 0;
+	padding: 0;
+	background-color:#FFFFFF;
+	margin-right:0px;
+	margin-top:10px;
+	color:#000000;
+	vertical-align: baseline;
+	line-height: 1;
+}
+
+/* The container */
+#cssmenu3 > ul{
+	display: block;
+	position: relative;
+	width: 250px;
+}
+
+	/* The list elements which contain the links */
+	#cssmenu3 > ul li {
+		display: block;
+		position: relative;
+		margin: 0;
+		padding: 0;
+		background-color:#f23f37;
+		width: 250px;	
+	}
+
+		/* General link styling */
+		#cssmenu3 > ul li a {
+			/* Layout */
+			display: block;
+			position: relative;
+			margin: 0;
+			border-top: 1px dotted #fff;
+			border-bottom: 1px dotted #d9d9d9;
+			padding: 11px 20px;
+			width: 210px;
+
+			/* Typography */
+			font-family:  Helvetica, Arial, sans-serif;
+			color: #FFFFFF;
+			text-decoration: none;
+			text-transform: uppercase;
+			text-shadow: 0 1px 0 #fff;
+			font-size: 12px;
+			font-weight: 300;
+
+			/* Background & effects */
+			background-color: #004000;
+		}
+
+		/* Rounded corners for the first link of the menu/submenus */
+		#cssmenu3 > ul li:first-child>a {
+			border-top-left-radius: 4px;
+			border-top-right-radius: 4px;
+			border-top: 0;
+		}
+
+		/* Rounded corners for the last link of the menu/submenus */
+		#cssmenu3 > ul li:last-child>a {
+			border-bottom-left-radius: 4px;
+			border-bottom-right-radius: 4px;
+			border-bottom: 0;
+			
+		}
+
+
+		/* The hover state of the menu/submenu links */
+		#cssmenu3 > ul li a:hover, #cssmenu2 > ul li:hover>a {
+			color: #fff;
+			text-shadow: 0 1px 0 rgba(0, 0, 0, .25);
+			background-color: #006699;
+			background: -o-linear-gradient(bottom, #00CC99, #00CC99);
+			background: -ms-linear-gradient(bottom, #00CC99, #00CC99); 
+			background: -moz-linear-gradient(bottom, #00CC99, #00CC99);
+			background: -o-linear-gradient(bottom, #00CC99, #00CC99);
+			border-color: transparent;
+		}
+
+		/* The arrow indicating a submenu */
+		#cssmenu3 > ul .has-sub >a::after {
+			content: '';
+			position: absolute;
+			top: 16px;
+			right: 10px;
+			width: 0px;
+			height: 0px;
+
+			/* Creating the arrow using borders */
+			border: 4px solid transparent;
+			border-left: 4px solid #e4433c; 
+		}
+
+		/* The same arrow, but with a darker color, to create the shadow effect */
+		#cssmenu3 > ul .has-sub >a::before {
+			content: '';
+			position: absolute;
+			top: 17px;
+			right: 10px;
+			width: 0px;
+			height: 0px;
+
+			/* Creating the arrow using borders */
+			border: 4px solid transparent;
+			border-left: 4px solid #fff;
+		}
+
+		/* Changing the color of the arrow on hover */
+		#cssmenu3 > ul li>a:hover::after, #cssmenu3 > ul li:hover>a::after {
+			border-left: 4px solid #fff;
+		}
+
+		#cssmenu3 > ul li>a:hover::before, #cssmenu3 > ul li:hover>a::before {
+			border-left: 4px solid rgba(0, 0, 0, .25);
+		}
+
+	
+		/* THE SUBMENUS */
+		#cssmenu3 > ul ul {
+			position: absolute;
+			left: 150px;
+			top: -9999px;
+			padding-left: 5px;
+			opacity: 0;
+			/* The fade effect, created using an opacity transition */
+			-webkit-transition: opacity .3s ease-in;
+			-moz-transition: opacity .3s ease-in;
+			-o-transition: opacity .3s ease-in;
+			-ms-transition: opacity .3s ease-in;
+		}
+
+		/* Showing the submenu when the user is hovering the parent link */
+		#cssmenu3 > ul li:hover>ul {
+			top: 0px;
+			opacity: 1;
+		}
+/* Top Mneu ================== */
+
+.top_main_menu{
+	font-size:22px;
+	color:#CCCCCC;
+	background-color: #FFFFFF;	
+	width:830px;
+	height:105px;
+	position:fixed;
+}
+.menu{
+	width:125px;
+	float:left;
+	height:100px;
+	background-color:#6F9300;
+	margin:2px;
+	color:#CCCCCC;
+		-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+	border-radius:3px;
+}
+.menu:hover{
+	width:125px;
+	float:left;
+	height:100px;
+	background-color:#8BB900;
+	margin:2px;
+	color:#FFFFFF;
+	
+		-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+	border-radius:3px;
+}
+.menu_logo{
+	width:180px;
+	float:left;
+	height:100px;
+	background-color:#FFFFFF;
+	margin:2px;
+	color:#CCCCCC;
+		-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+	border-radius:3px;
+}
