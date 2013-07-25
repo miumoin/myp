@@ -1,7 +1,62 @@
 <?php
 if(isset($_REQUEST['process']))
 {
-	if($_REQUEST['process']=='scan')
+	if($_REQUEST['process']=='createauth')
+	{
+		if(trim($_REQUEST['pin'])!="")
+		{
+			if(!file_exists("../.mypauth")) $file=fopen("../.mypauth", "w");
+			$authcont=file_get_contents("../.mypauth");
+			if(trim($authcont)=="") file_put_contents("../.mypauth", trim($_REQUEST['pin']));			
+		}
+		
+		header("location:index.php");
+		die();
+	}
+	elseif($_REQUEST['process']=='authenticate')
+	{
+		$authcont=file_get_contents("../.mypauth");
+		if(trim($_REQUEST['pin'])==trim($authcont))
+		{
+			session_start();
+			$_SESSION['mypauth']=1;
+		}
+		
+		header("location:index.php");
+		die();
+	}
+	elseif($_REQUEST['process']=='createnode')
+	{
+		$local=get_local_address();
+		if(!isset($_REQUEST['remote']))
+		{
+			session_start();
+			$remote=$_REQUEST['new'];
+			add_new_node($remote, $local);
+		}
+		
+		header("location:index.php?option=addnode");
+		die();
+	}
+	elseif($_REQUEST['process']=='newnodeinfo')
+	{
+		$info=file_get_contents("../.mypconfig");
+		echo $info;
+		die();
+	}
+	elseif($_REQUEST['process']=='addnode')
+	{
+		$newnode=$_REQUEST['node'];
+		$conf=json_decode(file_get_contents("../.mypconfig"));	    
+		foreach($conf as $c)
+		{
+			$nodes[]=$c;
+		}
+		$nodes[]=$newnode;
+		file_put_contents("../.mypconfig", json_encode($nodes));
+		die();
+	}
+	elseif($_REQUEST['process']=='scan')
 	{
 		scan();
 	}
@@ -30,8 +85,6 @@ if(isset($_REQUEST['process']))
 	{
 		$filename="../".$_REQUEST['file'];
 		
-		//if(strpos)($filename
-		//echo $filename;
 		$local=get_local_address();
 		$hosts=json_decode(file_get_contents("../.mypconfig"));
 		
@@ -91,7 +144,11 @@ if(isset($_REQUEST['process']))
 			echo file_get_contents($filename);
 		}
 	}
+	die();
 }
+
+//display control panel of MYP
+myp_control_panel();
 
 //need to check at some real server if it works fine or need a revision
 function get_local_address()
@@ -338,5 +395,196 @@ function create_zip($files = array(),$destination = '',$overwrite = false) {
 	{
 		return false;
 	}
+}
+
+/*---Adding a new node-----*/
+function add_new_node($remote, $local)
+{
+	$pin=trim(file_get_contents("../.mypauth"));
+	$ch = curl_init($remote."/myp/index.php?process=beanode&pin=".$pin."&remote=".$local);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$result = curl_exec($ch);
+	curl_close($ch);
+	$newnode=trim($result);
+	
+	if($newnode!="")
+	{
+		$conf=json_decode(file_get_contents("../.mypconfig"));	    
+		foreach($conf as $c)
+		{
+			$nodes[]=$c;
+		}
+		$nodes[]=$newnode;
+		file_put_contents("../.mypconfig", json_encode($nodes));
+		
+		//requesting other nodes to add this new node
+		foreach($nodes as $node)
+		{
+			if(($node!=$local) && ($node!=$newnode)) new_node_add_req($node, $newnode);
+		}
+	}
+}
+
+function new_node_add_req($remote, $node)
+{
+	$local=get_local_address();
+	$ch = curl_init($remote."/myp/index.php?process=addnode&node=".$node."&remote=".$local);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$result = curl_exec($ch);
+	curl_close($ch);
+}
+
+function beanode($remote, $mypauth)
+{
+	if((!file_exists("../.mypconfig")) && (!file_exists("../.mypauth")))
+	{
+		fopen("../.mypconfig", "w");
+		fopen("../.mypauth", "w");
+		$local=get_local_address();
+		
+		$ch = curl_init($remote."/myp/index.php?process=newnodeinfo&remote=".$local);
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$result = curl_exec($ch);      
+		curl_close($ch);
+		
+		$conf=json_decode($result);		    
+		foreach($conf as $c)
+		{
+			$nodes[]=$c;
+		}		
+		$nodes[]=$local;
+		file_put_contents("../.mypconfig", json_encode($nodes));
+		
+		file_put_contents("../.mypauth", $mypauth);
+		echo $local;
+	}
+}
+/*-----------Adding new node finished--------------*/
+
+function myp_control_panel()
+{
+	session_start();
+	if(file_exists("../.mypauth")) $config=1;
+	if(file_exists("../.mypconfig")) $mypconfig=1;
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+        <meta name='description' content='MYP is a Open Source Private Content Management System'/>
+        <meta name='keywords' content='CDN, MYP, Open Source'/>
+		<title>MYP- Open Source Private CDN</title>
+		<link href="assets/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+		<link href="assets/css/bootstrap-responsive.css" rel="stylesheet" type="text/css" />
+		<link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+		<script type='text/javascript' src='assets/js/vendor/jquery-1.9.1.min.js'></script>		
+		<script type='text/javascript' src='assets/js/bootstrap.min.js'></script>
+        <script type="text/javascript" src="assets/js/javascripts.js"></script>    
+    </head>
+    <body>
+		<div class='container'>
+			<div class="navbar">
+					<div class="navbar-inner">
+						<div class="container">
+					 
+							<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+							<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+							</a>
+						 
+							<!-- Be sure to leave the brand out there if you want it shown -->
+							<a class="brand" href="index.php">MYP-CDN</a>		
+							
+							<!-- Everything you want hidden at 940px or less, place within here -->
+							<div class="nav-collapse collapse">				
+							<!-- .nav, .navbar-search, .navbar-form, etc -->
+							
+								<ul class="nav">
+										<?php if(!isset($_SESSION['mypauth'])) { ?><li><a>Configure</a></li> <?php } else { ?>
+										<li><a href='index.php?option=addnode'>Add Node</a></li>
+										<li><a href='index.php?option=schedule'>Schedule</a></li>
+										<?php } ?>
+								</ul>
+							</div>
+			 
+						</div>
+					</div>
+				</div>
+				
+				<?php 
+					if($config!=1)
+					{
+						echo "<form action='index.php?process=createauth' method='post'>";
+							echo "<fieldset>";
+								echo "<legend>Create a PIN</legend>";
+								echo "<label>Enter a Pin: </label>";
+								echo "<input type='text' name='pin' placeholder='PIN Number'>";
+								echo "<label></label><input type='submit' class='btn' value='Save'>";
+							echo "</fieldset>";
+						echo "</form>";
+					}
+					else
+					{
+						if((isset($_SESSION['mypauth'])) && ($_SESSION['mypauth']==1))
+						{
+							if($_REQUEST['option']=='addnode')
+							{
+								$nodes=json_decode(file_get_contents("../.mypconfig"));
+								echo "<h3>Active Nodes</h3>";
+								foreach($nodes as $node)
+								{
+									echo $node."<br>";
+								}
+								
+								echo "<form action='index.php?process=createnode' method='post'>";
+									echo "<fieldset>";
+										echo "<legend>Add a New Node</legend>";
+										echo "<p>First, copy MYP scripts with it's directory at the new node's file server. Then put the server location here and push \"Create\" button.</p>";
+										echo "<label>Node Address: </label>";
+										echo "<input type='text' name='new' placeholder='Node Address'>";
+										echo "<label></label><input type='submit' class='btn' value='Create'>";
+									echo "</fieldset>";
+								echo "</form>";
+							}
+							elseif($_REQUEST['option']=='schedule')
+							{
+								
+							}
+							else
+							{
+								$nodes=json_decode(file_get_contents("../.mypconfig"));
+								echo "<h3>Active Nodes</h3>";
+								foreach($nodes as $node)
+								{
+									echo $node."<br>";
+								}
+							}
+						}
+						else
+						{
+							echo "<form action='index.php?process=authenticate' method='post'>";
+								echo "<fieldset>";
+									echo "<legend>Login Using PIN No</legend>";
+									echo "<label>Enter Pin: </label>";
+									echo "<input type='text' name='pin' placeholder='PIN Number'>";
+									echo "<label></label><input type='submit' class='btn' value='Login'>";
+								echo "</fieldset>";
+							echo "</form>";
+						}
+					}
+					   
+				?>
+		</div>
+	</body>
+</html>
+<?php
 }
 ?>
