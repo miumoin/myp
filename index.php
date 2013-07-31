@@ -38,6 +38,10 @@ if(isset($_REQUEST['process']))
 		header("location:index.php?option=addnode");
 		die();
 	}
+	elseif($_REQUEST['process']=='beanode')
+	{
+		beanode($_REQUEST['remote'], $_REQUEST['pin']);
+	}
 	elseif($_REQUEST['process']=='newnodeinfo')
 	{
 		$info=file_get_contents("../.mypconfig");
@@ -55,6 +59,28 @@ if(isset($_REQUEST['process']))
 		$nodes[]=$newnode;
 		file_put_contents("../.mypconfig", json_encode($nodes));
 		die();
+	}
+	elseif($_REQUEST['process']=='schedule')
+	{		
+		$output = shell_exec('crontab -l');
+		//first check if this specific remote server is already scheduled
+		$crons=explode("*/", $output);
+		foreach($crons as $cron) 
+		{
+			if(trim($cron)!="")
+			{				
+				$br=explode("remote=", $cron);
+				$brs=explode("'", $br[1]);
+				$nodecron=$brs[0];
+				$cronjob="*/".$cron;
+				if($nodecron==$_REQUEST['node']) $output=str_replace($cronjob, "", $output);
+			}
+		}
+		
+		$cron="*/".$_REQUEST['interval']." * * * * /usr/bin/curl -X GET 'http://localhost/msproject/myp/?process=synch&remote=".$_REQUEST['node']."'";
+		file_put_contents('/tmp/crontab.txt', $output.$cron.PHP_EOL);
+		exec('crontab /tmp/crontab.txt');
+		header("location:index.php?option=schedule");
 	}
 	elseif($_REQUEST['process']=='scan')
 	{
@@ -267,35 +293,45 @@ function synch($remote, $local)
 	$pdata=json_decode(file_get_contents("../.mypfiles", true));
 	fclose($mypfiles);
 	
+	//create a log variables
+	$remfiles=0;
+	$copfiles=0;
+		
 	foreach($synch_data as $sd)
 	{
 		$existence=search_loc_index_stdcls($pdata, $sd->loc);
-		if($existence!=false)
+		
+		if($existence)
 		{
 			$index=array_search($sd, $synch_data);
 			if(($sd->flag==0) && ($pdata[$existence]->flag==1))
 			{
-				//echo "Delete the file";
 				unlink($sd->loc);
+				$remfiles++;
 			}
 			//if exist then check file creation time. if file exists at remote server with different creation date then copy it here. File is newly created.
 			elseif($sd->flag!=0)
 			{
-				if(($pdata[$existence]->mtime<$sd->mtime) && ($pdata[$existence]->type!='dir')) $copy[]=$sd->loc;//echo $sd->loc.":".$sd->type.": copy from remote server"; //add the file into copy list
+				if(($pdata[$existence]->mtime<$sd->mtime) && ($pdata[$existence]->type!='dir')) 
+				{
+					$copy[]=$sd->loc;//echo $sd->loc.":".$sd->type.": copy from remote server"; //add the file into copy list
+					$copfiles++;
+				}
 				//else echo "Nothing to do";
 			}
 		}
 		else
 		{
-			$copy[]=$sd->loc;//echo $sd->loc.":".$sd->type.": Copy it here from ".$remote.str_replace("..", "", $sd->loc);
 			//add the file into copy list
-		}
-			
-			//if there are some files to be copied
-			//echo "<br>";			
+			if($sd->flag!=0) 
+			{
+				$copy[]=$sd->loc;
+				$copfiles++;
+			}			
+		}	
 	}
 	
-	if(isset($copy))
+	if((isset($copy))&& (count($copy)>0))
 	{
 		//now sending a file copying request to remote server
 		$copy=json_encode($copy);
@@ -324,7 +360,22 @@ function synch($remote, $local)
 		curl_exec($chd);
 		curl_close($chd);
 		
-		exec("unzip -B tmp/".$result.".zip -d ../");
+		exec("unzip -B tmp/".$result.".zip -d ../");		
+		unlink("tmp/".$result.".zip");
+	}
+	
+	if(!file_exists(".myplog"))
+	{
+		fopen(".myplog", "w");
+		$break="";
+	}
+	else $break="\n";
+	
+	if(($remfiles>0) || ($copfiles>0)) 
+	{
+		$logs=file_get_contents(".myplog");
+		$logs=$logs.$break."Time: ".date("Y-m-d H:i:s")." Node: ".$remote." Removed: ".$remfiles." Added: ".$copfiles;
+		file_put_contents(".myplog", $logs);
 	}
 }
 
@@ -556,16 +607,73 @@ function myp_control_panel()
 							}
 							elseif($_REQUEST['option']=='schedule')
 							{
+								//getting each node's cron information
+								$output = shell_exec('crontab -l');							
+								$crons=explode("*/", $output);
+								foreach($crons as $cron) 
+								{
+									if(trim($cron)!="")
+									{
+										$br=explode("*", $cron);
+										$timer=trim($br[0]);
+										
+										$br=explode("remote=", $cron);
+										$brs=explode("'", $br[1]);
+										$nodecron=$brs[0];
+										
+										$cronjobs[$nodecron]=$timer;
+									}
+								}								
 								
+								$local=get_local_address();
+								
+								echo "<fieldset>";
+									echo "<legend>Schedule Synchronization with nodes</legend>";
+									$nodes=json_decode(file_get_contents("../.mypconfig"));
+									$i=0;
+									echo "<table>";
+									echo "<tr><th>Serial</th><th>Server Name</th><th>Interval (Minute)</th></tr>";
+										foreach($nodes as $node)
+										{											
+											if($node!=$local)
+											{
+												$i++;
+												if(isset($cronjobs[$node])) $timer=$cronjobs[$node];
+												else $timer=1;
+												
+												echo "<form method='post' action='index.php?process=schedule&node=$node'>";
+													echo "<tr>";
+														echo "<td>$i</td><td>$node</td>";
+														echo "<td><select name='interval' selected='$timer'>";
+															for($j=1; $j<60; $j++)
+															{
+																if($j==$timer) $selected="selected";
+																else $selected="";
+																echo "<option value='$j' $selected>$j Minutes</option>";
+															}
+														echo "</select></td>";
+														echo "<td><input type='submit' class='btn' value='Schedule'></td>";
+													echo "</tr>";
+												echo "</form>";
+											}
+										}
+								echo "</fieldset>";
 							}
 							else
 							{
 								$nodes=json_decode(file_get_contents("../.mypconfig"));
+								$i=0;
 								echo "<h3>Active Nodes</h3>";
-								foreach($nodes as $node)
-								{
-									echo $node."<br>";
-								}
+								echo "<table>";
+									echo "<tr><th>Serial</th><th>Server Name</th><th>Control Panel</th></tr>";
+									foreach($nodes as $node)
+									{
+										$i++;
+										echo "<tr>";
+											echo "<td>$i</td><td>$node</td><td><a href='$node/myp' target='_blank'>Login</a></td><br>";
+										echo "</tr>";
+									}
+								echo "</table>";
 							}
 						}
 						else
