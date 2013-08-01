@@ -1,4 +1,7 @@
 <?php
+/*echo $output = shell_exec('crontab -l');
+		file_put_contents('/tmp/crontab.txt', "".PHP_EOL);
+		exec('crontab /tmp/crontab.txt');*/
 if(isset($_REQUEST['process']))
 {
 	if($_REQUEST['process']=='createauth')
@@ -6,6 +9,13 @@ if(isset($_REQUEST['process']))
 		if(trim($_REQUEST['pin'])!="")
 		{
 			if(!file_exists("../.mypauth")) $file=fopen("../.mypauth", "w");
+			if(!file_exists("../.mypconfig"))
+			{
+				$file=fopen("../.mypconfig", "w");
+				$nodes[]=get_local_address();
+				file_put_contents("../.mypconfig", json_encode($nodes));
+			}
+			
 			$authcont=file_get_contents("../.mypauth");
 			if(trim($authcont)=="") file_put_contents("../.mypauth", trim($_REQUEST['pin']));			
 		}
@@ -77,7 +87,7 @@ if(isset($_REQUEST['process']))
 			}
 		}
 		
-		$cron="*/".$_REQUEST['interval']." * * * * /usr/bin/curl -X GET 'http://localhost/msproject/myp/?process=synch&remote=".$_REQUEST['node']."'";
+		$cron="*/".$_REQUEST['interval']." * * * * /usr/bin/curl -X GET '".get_local_address()."/myp/?process=synch&remote=".$_REQUEST['node']."'";
 		file_put_contents('/tmp/crontab.txt', $output.$cron.PHP_EOL);
 		exec('crontab /tmp/crontab.txt');
 		header("location:index.php?option=schedule");
@@ -323,7 +333,7 @@ function synch($remote, $local)
 		else
 		{
 			//add the file into copy list
-			if($sd->flag!=0) 
+			if(($sd->flag!=0) && (!file_exists($sd->loc))) 
 			{
 				$copy[]=$sd->loc;
 				$copfiles++;
@@ -467,13 +477,14 @@ function add_new_node($remote, $local)
 			$nodes[]=$c;
 		}
 		$nodes[]=$newnode;
+				
 		file_put_contents("../.mypconfig", json_encode($nodes));
 		
 		//requesting other nodes to add this new node
 		foreach($nodes as $node)
 		{
 			if(($node!=$local) && ($node!=$newnode)) new_node_add_req($node, $newnode);
-		}
+		}		
 	}
 }
 
