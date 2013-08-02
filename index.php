@@ -16,6 +16,8 @@ if(isset($_REQUEST['process']))
 				file_put_contents("../.mypconfig", json_encode($nodes));
 			}
 			
+			if(!is_dir("tmp")) mkdir("tmp");
+			
 			$authcont=file_get_contents("../.mypauth");
 			if(trim($authcont)=="") file_put_contents("../.mypauth", trim($_REQUEST['pin']));			
 		}
