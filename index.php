@@ -342,14 +342,18 @@ function synch($remote, $local)
 			$index=array_search($sd, $synch_data);
 			if(($sd->flag==0) && ($pdata[$existence]->flag==1))
 			{
-				unlink($sd->loc);
+				if(is_dir($sd->loc)) rmdir($sd->loc); //{ echo "Hi"; die(); }//exec("rm -rf ".$sd->loc);
+				else unlink($sd->loc);
 				$remfiles++;
 			}
 			//if exist then check file creation time. if file exists at remote server with different creation date then copy it here. File is newly created.
 			elseif($sd->flag!=0)
 			{
-				if((($sd->mtime - $pdata[$existence]->mtime)>1) && ($pdata[$existence]->type!='dir')) 
+				if((($sd->mtime - $pdata[$existence]->mtime)>1) && ($pdata[$existence]->type!='dir'))
 				{
+					unlink($sd->loc);
+					$remfiles++;
+					
 					$copy[]=$sd->loc;
 					$copfiles++;
 				}
