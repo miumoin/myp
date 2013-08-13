@@ -1,7 +1,4 @@
 <?php
-/*echo $output = shell_exec('crontab -l');
-		file_put_contents('/tmp/crontab.txt', "".PHP_EOL);
-		exec('crontab /tmp/crontab.txt');*/
 if(isset($_REQUEST['process']))
 {
 	if($_REQUEST['process']=='createauth')
@@ -121,11 +118,10 @@ if(isset($_REQUEST['process']))
 	}
 	elseif($_REQUEST['process']=='content')
 	{
-		$filename="../".$_REQUEST['file'];
+		$filename="../".$_REQUEST['file'];		
 		
 		$local=get_local_address();
-		$hosts=json_decode(file_get_contents("../.mypconfig"));
-		
+		$hosts=json_decode(file_get_contents("../.mypconfig"));		
 		
 		if(isset($_REQUEST['red']))
 		{
@@ -143,11 +139,39 @@ if(isset($_REQUEST['process']))
 		}
 		else $red=0;
 		
-		
 		$hostsleft=count($hosts);
 		if($red==0)
 		{
-			$seli=rand(0, ($hostsleft-1));
+			if(file_exists($filename)) 
+			{
+				$filesize=filesize($filename); 
+				if(!file_exists(".mypdelivery"))
+				{
+					fopen(".mypdelivery", "w");
+					foreach($hosts as $host)
+					{
+						$deliveries[$host]=array('num'=>0, 'size'=>500);
+						file_put_contents(".mypdelivery", json_encode($deliveries));
+					}
+				}	
+			}
+			
+			$deliveries=json_decode(file_get_contents(".mypdelivery"));
+			
+			$seli=0;
+			foreach($hosts as $host)
+			{
+				if((!isset($lowest)) || ($lowest>$deliveries->$host->size))
+				{
+					$lowest=$deliveries->$host->size;
+					$seli=array_search($host, $hosts);
+					$selihost=$hosts[$seli];
+				}
+			}
+			$deliveries->$selihost->size+=$filesize;
+			$deliveries->$selihost->num+=1;
+			file_put_contents(".mypdelivery", json_encode($deliveries));
+			
 			if($hosts[$seli]!=$local)
 			{
 				header("location:".$hosts[$seli]."/".$_REQUEST['file']."?red=1&host1=".$local);
@@ -324,12 +348,11 @@ function synch($remote, $local)
 			//if exist then check file creation time. if file exists at remote server with different creation date then copy it here. File is newly created.
 			elseif($sd->flag!=0)
 			{
-				if(($pdata[$existence]->mtime<$sd->mtime) && ($pdata[$existence]->type!='dir')) 
+				if((($sd->mtime - $pdata[$existence]->mtime)>1) && ($pdata[$existence]->type!='dir')) 
 				{
-					$copy[]=$sd->loc;//echo $sd->loc.":".$sd->type.": copy from remote server"; //add the file into copy list
+					$copy[]=$sd->loc;
 					$copfiles++;
 				}
-				//else echo "Nothing to do";
 			}
 		}
 		else
@@ -372,7 +395,7 @@ function synch($remote, $local)
 		curl_exec($chd);
 		curl_close($chd);
 		
-		exec("unzip -B tmp/".$result.".zip -d ../");		
+		exec("unzip -B tmp/".$result.".zip -d ../");
 		unlink("tmp/".$result.".zip");
 	}
 	
@@ -429,7 +452,7 @@ function create_zip($files = array(),$destination = '',$overwrite = false) {
 		//cycle through each file
 		foreach($files as $file) {
 			//make sure the file exists
-			if(file_exists($file)) {
+			if((file_exists($file)) && (!is_dir($file))) {
 				$valid_files[] = $file;
 			}
 		}
