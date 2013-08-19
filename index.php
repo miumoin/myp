@@ -118,10 +118,11 @@ if(isset($_REQUEST['process']))
 	}
 	elseif($_REQUEST['process']=='content')
 	{
-		$filename="../".$_REQUEST['file'];		
+		$filename="../".$_REQUEST['file'];
 		
 		$local=get_local_address();
-		$hosts=json_decode(file_get_contents("../.mypconfig"));		
+		$hosts=json_decode(file_get_contents("../.mypconfig"));
+		
 		
 		if(isset($_REQUEST['red']))
 		{
@@ -139,39 +140,11 @@ if(isset($_REQUEST['process']))
 		}
 		else $red=0;
 		
+		
 		$hostsleft=count($hosts);
 		if($red==0)
 		{
-			if(file_exists($filename)) 
-			{
-				$filesize=filesize($filename); 
-				if(!file_exists(".mypdelivery"))
-				{
-					fopen(".mypdelivery", "w");
-					foreach($hosts as $host)
-					{
-						$deliveries[$host]=array('num'=>0, 'size'=>500);
-						file_put_contents(".mypdelivery", json_encode($deliveries));
-					}
-				}	
-			}
-			
-			$deliveries=json_decode(file_get_contents(".mypdelivery"));
-			
-			$seli=0;
-			foreach($hosts as $host)
-			{
-				if((!isset($lowest)) || ($lowest>$deliveries->$host->size))
-				{
-					$lowest=$deliveries->$host->size;
-					$seli=array_search($host, $hosts);
-					$selihost=$hosts[$seli];
-				}
-			}
-			$deliveries->$selihost->size+=$filesize;
-			$deliveries->$selihost->num+=1;
-			file_put_contents(".mypdelivery", json_encode($deliveries));
-			
+			$seli=rand(0, ($hostsleft-1));
 			if($hosts[$seli]!=$local)
 			{
 				header("location:".$hosts[$seli]."/".$_REQUEST['file']."?red=1&host1=".$local);
@@ -196,8 +169,8 @@ if(isset($_REQUEST['process']))
 				}
 				
 				header("location:".$rem."/".$_REQUEST['file'].$regurl);
-			}
-			die();
+				die();
+			}			
 		}
 		
 		if(file_exists($filename))
@@ -207,6 +180,7 @@ if(isset($_REQUEST['process']))
 		}
 	}
 	die();
+	
 }
 
 //display control panel of MYP
