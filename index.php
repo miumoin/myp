@@ -144,7 +144,8 @@ if(isset($_REQUEST['process']))
 		$hostsleft=count($hosts);
 		if($red==0)
 		{
-			$seli=rand(0, ($hostsleft-1));
+			$seli=rand(0, ($hostsleft-1));			
+			
 			if($hosts[$seli]!=$local)
 			{
 				header("location:".$hosts[$seli]."/".$_REQUEST['file']."?red=1&host1=".$local);
